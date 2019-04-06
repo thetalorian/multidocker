@@ -1,0 +1,20 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t thetalorian/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run thetalorian/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t thetalorian/md-client ./client
+  - docker build -t thetalorian/md-server ./server
+  - docker build -t thetalorian/md-worker ./worker
+  - docker build -t thetalorian/md-nginx ./nginx
+  - echo "$DOCKER_PASS" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push thetalorian/md-client
+  - docker push thetalorian/md-server
+  - docker push thetalorian/md-worker
+  - docker push thetalorian/md-nginx
